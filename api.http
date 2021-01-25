@@ -1,0 +1,59 @@
+###
+POST http://127.0.0.1:8000/api/industries
+Content-Type: application/json
+{
+    "name": "Samsung"
+}1
+
+###
+POST http://localhost:3000/groups
+Content-Type: application/json
+
+{
+    "name": "Group Name",
+    "url": "https://www.facebook.com",
+    "picture_url": "https://dummyimage.com/600x400/000/fff&text=DBImage",
+    "industry_id": "5ffadb3208ef5346cec91613"
+}
+
+###
+POST http://localhost:3000/groups
+Content-Type: application/json
+
+{
+    "name": "Group Name",
+    "url": "https://www.facebook.com",
+    "industry_id": "6001993b9bbd588ead5ba0c8"
+}
+
+
+###
+GET http://localhost:3000/api/groups?industry_id=
+
+###
+GET http://localhost:3000/groups?industry_id=6001993b9bbd588ead5ba0c8
+
+###
+GET http://localhost:3000/industries
+
+###
+GET http://localhost:3000/groups/6001994c9bbd588ead5ba0ca
+
+###
+POST http://localhost:3000/api/posts
+Content-Type: application/json
+
+{
+    "profile_name": "Samsung",
+    "profile_link": "Samsung",
+    "link": "Samsung",
+    "date": "2021-01-19T18:38:47.226Z",
+    "group": "Samsung",
+    "type": "Samsung",
+    "text": "Samsung",
+    "attachments": ["Samsung","Samsung2"],
+    "comments": [{ "name": "Samsung", "text": "Samsung Text" },{ "name": "Samsung", "text": "Samsung Text" }]
+}
+
+###
+GET http://localhost:3000/api/posts

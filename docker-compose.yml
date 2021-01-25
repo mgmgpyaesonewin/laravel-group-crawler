@@ -1,0 +1,21 @@
+version: '3.8'
+
+networks:
+  crawler:
+    name: crawler
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: psqladmin
+      POSTGRES_PASSWORD: QmluZGV6UG9zdGdyZXNxbEdyb3Vw
+      POSTGRES_DB: bindez
+    networks:
+      - crawler
