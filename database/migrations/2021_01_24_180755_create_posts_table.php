@@ -15,7 +15,6 @@ class CreatePostsTable extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->string('url');
             $table->string('profile_name');
             $table->string('profile_link');
             $table->string('link');
