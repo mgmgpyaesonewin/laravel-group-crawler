@@ -63,39 +63,39 @@ class PostController extends Controller
                     'post_id' => $post->id
                 ]);
             }
-            $comments_arr = array();
-            $industry_id = Group::whereId($data['group_id'])->first()->industry_id;
-            foreach ($data['comments'] as $comments) {
-                $data = Comment::create([
-                    'name' => $comments['name'],
-                    'text' => $comments['text'],
-                    'post_id' => $post->id,
-                    'industry_id' => $industry_id
-                ]);
-                array_push($comments_arr, $data->id);
-            }
-            $payload_data = Comment::with('industry')->whereIn('id', $comments_arr)->get();
-            $payload = $payload_data->map(function ($data) {
-                return [
-                    'id' => $data->id,
-                    'text' => $data->text,
-                    'industry' => $data->industry->name
-                ];
-            });
-            $response_nlp_data = Http::post('https://teatimebook.com/nlp/nlpclassifier/batch/async', [
-                'payload' => $payload
+        }
+        $comments_arr = array();
+        $industry_id = Group::whereId($data['group_id'])->first()->industry_id;
+        foreach ($data['comments'] as $comments) {
+            $data = Comment::create([
+                'name' => $comments['name'],
+                'text' => $comments['text'],
+                'post_id' => $post->id,
+                'industry_id' => $industry_id
             ]);
-            $sentiments = $response_nlp_data['payload'];
-            foreach ($sentiments as $sentiment) {
-                Comment::whereId($sentiment['id'])->update([
-                    'sentiment' => $sentiment['sentiment']
+            array_push($comments_arr, $data->id);
+        }
+        $payload_data = Comment::with('industry')->whereIn('id', $comments_arr)->get();
+        $payload = $payload_data->map(function ($data) {
+            return [
+                'id' => $data->id,
+                'text' => $data->text,
+                'industry' => $data->industry->name
+            ];
+        });
+        $response_nlp_data = Http::post('https://teatimebook.com/nlp/nlpclassifier/batch/async', [
+            'payload' => $payload
+        ]);
+        $sentiments = $response_nlp_data['payload'];
+        foreach ($sentiments as $sentiment) {
+            Comment::whereId($sentiment['id'])->update([
+                'sentiment' => $sentiment['sentiment']
+            ]);
+            foreach ($sentiment['tags'] as $tag) {
+                Tag::create([
+                    'name' => $tag,
+                    'comment_id' => $sentiment['id']
                 ]);
-                foreach ($sentiment['tags'] as $tag) {
-                    Tag::create([
-                        'name' => $tag,
-                        'comment_id' => $sentiment['id']
-                    ]);
-                }
             }
         }
         return response()->json([
