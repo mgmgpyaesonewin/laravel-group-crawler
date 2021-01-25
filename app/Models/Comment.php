@@ -10,4 +10,9 @@ class Comment extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    public function industry()
+    {
+        return $this->belongsTo(Industry::class, 'industry_id');
+    }
 }

@@ -6,11 +6,14 @@ use App\Http\Requests\GroupRequest;
 use App\Http\Requests\PostRequest;
 use App\Models\Attachment;
 use App\Models\Comment;
+use App\Models\Group;
 use App\Models\Post;
+use App\Models\Tag;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Http;
 
 class PostController extends Controller
 {
@@ -60,16 +63,43 @@ class PostController extends Controller
                     'post_id' => $post->id
                 ]);
             }
+            $comments_arr = array();
+            $industry_id = Group::whereId($data['group_id'])->first()->industry_id;
             foreach ($data['comments'] as $comments) {
-                Comment::create([
+                $data = Comment::create([
                     'name' => $comments['name'],
                     'text' => $comments['text'],
-                    'post_id' => $post->id
+                    'post_id' => $post->id,
+                    'industry_id' => $industry_id
                 ]);
+                array_push($comments_arr, $data->id);
+            }
+            $payload_data = Comment::with('industry')->whereIn('id', $comments_arr)->get();
+            $payload = $payload_data->map(function ($data) {
+                return [
+                    'id' => $data->id,
+                    'text' => $data->text,
+                    'industry' => $data->industry->name
+                ];
+            });
+            $response_nlp_data = Http::post('https://teatimebook.com/nlp/nlpclassifier/batch/async', [
+                'payload' => $payload
+            ]);
+            $sentiments = $response_nlp_data['payload'];
+            foreach ($sentiments as $sentiment) {
+                Comment::whereId($sentiment['id'])->update([
+                    'sentiment' => $sentiment['sentiment']
+                ]);
+                foreach ($sentiment['tags'] as $tag) {
+                    Tag::create([
+                        'name' => $tag,
+                        'comment_id' => $sentiment['id']
+                    ]);
+                }
             }
         }
         return response()->json([
-            'id' => $post->id
+            'id' => $post->id,
         ]);
     }
 
