@@ -20,11 +20,13 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $posts = Post::with('comments', 'groups')->latest()->get();
+        $skip = $request->query('skip', 0);
+        $posts = Post::with('comments', 'groups')->latest()->skip($skip)->limit(4)->get();
         return response()->json($posts);
     }
 
