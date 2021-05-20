@@ -26,7 +26,7 @@ class PostController extends Controller
     public function index(Request $request): JsonResponse
     {
         $skip = $request->query('skip', 0);
-        $posts = Post::with('comments', 'groups')->latest()->skip($skip)->limit(4)->get();
+        $posts = Post::with(['comments', 'groups', 'attachments:link,post_id'])->latest()->skip($skip)->limit(4)->get();
         return response()->json($posts);
     }
 
